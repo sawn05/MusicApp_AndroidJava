@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <!-- Ảnh bài hát -->
+    <ImageView
+        android:id="@+id/imgSongCover"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/nneungayay"
+        android:layout_marginRight="12dp"/>
+
+    <!-- Tên bài hát + ca sĩ -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvSongName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nếu ngày ấy"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tvSongArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Soobin Hoàng Sơn"
+            android:textColor="@android:color/black"
+            android:textSize="13sp"/>
+    </LinearLayout>
+
+    <!-- Thời lượng -->
+    <TextView
+        android:id="@+id/tvSongDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3:01"
+        android:textColor="@android:color/black"
+        android:layout_marginRight="15dp"/>
+
+    <!-- Icon -->
+    <ImageView
+        android:id="@+id/isLiked"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/heart"
+        android:layout_marginRight="15dp"/>
+
+    <!-- Icon -->
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/more_hoz"/>
+</LinearLayout>

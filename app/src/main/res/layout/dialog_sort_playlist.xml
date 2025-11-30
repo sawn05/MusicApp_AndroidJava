@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@drawable/bg_popup_dark"
+    android:paddingVertical="6dp"
+    android:paddingHorizontal="8dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/opt_recently_added"
+        style="@style/PopupOption"
+        android:text="Recently added" />
+
+    <TextView
+        android:id="@+id/opt_name"
+        style="@style/PopupOption"
+        android:text="Playlist name" />
+
+    <TextView
+        android:id="@+id/opt_all"
+        style="@style/PopupOption"
+        android:text="All playlists" />
+</LinearLayout>
