@@ -11,22 +11,21 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import android.widget.TextView;
 import android.view.View;
-import android.widget.ScrollView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.demoapp.MyService;
 import com.example.demoapp.R;
-import com.example.demoapp.adapter.OutstandingAdapter;
+import com.example.demoapp.adapter.AlbumSongAdapter;
 import com.example.demoapp.adapter.PlaylistAdapter;
 import com.example.demoapp.adapter.RecentSongAdapter;
 import com.example.demoapp.adapter.SongAdapter;
 import com.example.demoapp.adapter.TrendingAdapter;
-import com.example.demoapp.model.Outstanding;
+import com.example.demoapp.model.Album;
 import com.example.demoapp.model.Playlist;
 import com.example.demoapp.model.RecentSong;
+import com.example.demoapp.model.SessionManager;
 import com.example.demoapp.model.Song;
 import com.example.demoapp.model.Trending;
 import com.example.demoapp.storage_data.DBHelper;
@@ -42,7 +41,7 @@ public class HomeActivity extends AppCompatActivity {
     public static final String NOW_PLAYING = "ACTION_NOW_PLAYING";
 
     private ShapeableImageView imgMiniSong;
-    private TextView tvMiniSongName, tvMiniArtist;
+    private TextView tvMiniSongName, tvMiniArtist, tvGreeting;
     private ImageView imgPlayPause, btnNextSong;
     private LinearLayout miniPlayer;
 
@@ -111,6 +110,11 @@ public class HomeActivity extends AppCompatActivity {
         tvMiniArtist = findViewById(R.id.tvMiniArtist);
         imgPlayPause = findViewById(R.id.btnMiniPlayPause);
         btnNextSong = findViewById(R.id.btnNext);
+        tvGreeting = findViewById(R.id.tvGreeting);
+
+
+        String username = SessionManager.getInstance().getUsername();
+        tvGreeting.setText("Xin chào " + username + "!");
 
         // Đăng ký Receiver (Android 13+ yêu cầu flag rõ ràng)
         registerReceiver(miniPlayerReceiver, new IntentFilter(UPDATE_MINI_PLAYER), Context.RECEIVER_EXPORTED);
@@ -178,7 +182,7 @@ public class HomeActivity extends AppCompatActivity {
         // --- Dữ liệu Playlist ---
         RecyclerView rvPlaylist = findViewById(R.id.rvPlaylist);
         DBHelper dbHelperPlaylist = new DBHelper(this);
-        List<Playlist> playlists = dbHelperPlaylist.getAllAlbums();
+        List<Playlist> playlists = dbHelperPlaylist.getAllPlaylist();
 
         PlaylistAdapter playlistAdapter = new PlaylistAdapter(playlists, R.layout.item_playlist_horizontal);
         rvPlaylist.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -187,26 +191,35 @@ public class HomeActivity extends AppCompatActivity {
         // --- Dữ liệu Trending ---
         RecyclerView rvTrending = findViewById(R.id.rvTrending);
         List<Trending> trendings = new ArrayList<>();
-        trendings.add(new Trending("Âm thầm bên em", "ERIK", R.drawable.amthambenem, R.raw.amthambenem));
+        trendings.add(new Trending("Âm thầm bên em", "Sơn Tùng MTP", R.drawable.amthambenem, R.raw.amthambenem));
         trendings.add(new Trending("Người ấy", "Nguyenn", R.drawable.nguoiay, R.raw.nguoiay));
-        trendings.add(new Trending("Làm vợ anh nhé", "ERIK", R.drawable.lamvoaanhnhe, R.raw.lamvoanhnhe));
-        trendings.add(new Trending("Sai người sai thời điểm", "ERIK", R.drawable.sainguoisaithoidiem, R.raw.sainguoisaithoidiem));
-        trendings.add(new Trending("Bình yên nơi đâu", "ERIK", R.drawable.binhyennoidau, R.raw.binhyennoidau));
-        trendings.add(new Trending("Tệ thật anh nhớ em", "ERIK", R.drawable.tethatanhnhoem, R.raw.tethatanhnhoem));
+        trendings.add(new Trending("Làm vợ anh nhé", "Chi Dân", R.drawable.lamvoaanhnhe, R.raw.lamvoanhnhe));
+        trendings.add(new Trending("Sai người sai thời điểm", "Thanh Hưng", R.drawable.sainguoisaithoidiem, R.raw.sainguoisaithoidiem));
+        trendings.add(new Trending("Bình yên nơi đâu", "Sơn Tùng MTP", R.drawable.binhyennoidau, R.raw.binhyennoidau));
+        trendings.add(new Trending("Tệ thật anh nhớ em", "Thanh Hưng", R.drawable.tethatanhnhoem, R.raw.tethatanhnhoem));
 
         TrendingAdapter trendingAdapter = new TrendingAdapter(trendings);
         rvTrending.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvTrending.setAdapter(trendingAdapter);
 
         // --- Outstanding ---
-        RecyclerView rvOutstanding = findViewById(R.id.rvOutstanding);
-        List<Outstanding> outstandings = new ArrayList<>();
-        outstandings.add(new Outstanding("Dù cho tận thế", R.drawable.duchotanthe));
-        outstandings.add(new Outstanding("Nơi này có anh", R.drawable.noinaycoanh));
-        outstandings.add(new Outstanding("Anh sai rồi", R.drawable.anhsairoi));
-        OutstandingAdapter outstandingAdapter = new OutstandingAdapter(outstandings);
+        /*RecyclerView rvOutstanding = findViewById(R.id.rvOutstanding);
+        List<Album> outstandings = new ArrayList<>();
+        outstandings.add(new Album("Dù cho tận thế", R.drawable.duchotanthe));
+        outstandings.add(new Album("Nơi này có anh", R.drawable.noinaycoanh));
+        outstandings.add(new Album("Anh sai rồi", R.drawable.anhsairoi));
+        AlbumSongAdapter albumSongAdapter = new AlbumSongAdapter(outstandings);
         rvOutstanding.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvOutstanding.setAdapter(outstandingAdapter);
+        rvOutstanding.setAdapter(albumSongAdapter);*/
+
+        // Album Song
+        RecyclerView rvAlbumSong = findViewById(R.id.rvAlbumSong);
+        DBHelper dbHelperAlbum = new DBHelper(this);
+        List<Album> albums = dbHelperAlbum.getAllAlbums();
+
+        AlbumSongAdapter albumAdapter = new AlbumSongAdapter(albums);
+        rvAlbumSong.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvAlbumSong.setAdapter(albumAdapter);
 
         // --- Recent songs ---
         RecyclerView rvRecentSong = findViewById(R.id.rvRecentSong);
@@ -275,52 +288,52 @@ public class HomeActivity extends AppCompatActivity {
     private void hintScrollView() {
         TextView tvPlaylistTitle = findViewById(R.id.tvPlaylistTitle);
         TextView tvTrending = findViewById(R.id.txtTrending);
-        TextView tvOutstanding = findViewById(R.id.txtOutstanding);
+        TextView tvAlbum = findViewById(R.id.tvAlbum);
         TextView tvRecentSong = findViewById(R.id.txtRecentSong);
 
 
         RecyclerView rvPlaylist = findViewById(R.id.rvPlaylist);
         RecyclerView rvTrending = findViewById(R.id.rvTrending);
-        RecyclerView rvOutstanding = findViewById(R.id.rvOutstanding);
+        RecyclerView rvAlbumSong = findViewById(R.id.rvAlbumSong);
         RecyclerView rvRecentSong = findViewById(R.id.rvRecentSong);
 
 
 
         rvPlaylist.setVisibility(View.GONE);
         rvTrending.setVisibility(View.GONE);
-        rvOutstanding.setVisibility(View.GONE);
+        rvAlbumSong.setVisibility(View.GONE);
         rvRecentSong.setVisibility(View.GONE);
 
 
         tvPlaylistTitle.setVisibility(View.GONE);
         tvTrending.setVisibility(View.GONE);
-        tvOutstanding.setVisibility(View.GONE);
+        tvAlbum.setVisibility(View.GONE);
         tvRecentSong.setVisibility(View.GONE);
     }
 
     private void showScrollView() {
         TextView tvPlaylistTitle = findViewById(R.id.tvPlaylistTitle);
         TextView tvTrending = findViewById(R.id.txtTrending);
-        TextView tvOutstanding = findViewById(R.id.txtOutstanding);
+        TextView tvAlbum = findViewById(R.id.tvAlbum);
         TextView tvRecentSong = findViewById(R.id.txtRecentSong);
 
 
         RecyclerView rvPlaylist = findViewById(R.id.rvPlaylist);
         RecyclerView rvTrending = findViewById(R.id.rvTrending);
-        RecyclerView rvOutstanding = findViewById(R.id.rvOutstanding);
+        RecyclerView rvAlbumSong = findViewById(R.id.rvAlbumSong);
         RecyclerView rvRecentSong = findViewById(R.id.rvRecentSong);
 
 
 
         rvPlaylist.setVisibility(View.VISIBLE);
         rvTrending.setVisibility(View.VISIBLE);
-        rvOutstanding.setVisibility(View.VISIBLE);
+        rvAlbumSong.setVisibility(View.VISIBLE);
         rvRecentSong.setVisibility(View.VISIBLE);
 
 
         tvPlaylistTitle.setVisibility(View.VISIBLE);
         tvTrending.setVisibility(View.VISIBLE);
-        tvOutstanding.setVisibility(View.VISIBLE);
+        tvAlbum.setVisibility(View.VISIBLE);
         tvRecentSong.setVisibility(View.VISIBLE);
     }
 

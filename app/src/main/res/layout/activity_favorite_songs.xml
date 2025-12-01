@@ -57,6 +57,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/btnPlayAllFavorite"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="@drawable/bg_circle"

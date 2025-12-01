@@ -92,16 +92,16 @@
             android:textColor="@android:color/white" />
 
         <!-- Hoặc đăng nhập bằng -->
-        <TextView
+        <!--<TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Hoặc đăng nhập bằng"
             android:textColor="#555"
-            android:textSize="14sp" />
+            android:textSize="14sp" />-->
 
         <!-- Google + Facebook -->
-        <LinearLayout
+        <!--<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -126,7 +126,7 @@
                 android:backgroundTint="#4CAF50"
                 android:padding="10dp"
                 android:text="Facebook" />
-        </LinearLayout>
+        </LinearLayout>-->
 
         <!-- Chưa có tài khoản -->
         <LinearLayout

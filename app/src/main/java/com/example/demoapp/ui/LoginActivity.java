@@ -51,18 +51,18 @@ public class LoginActivity extends AppCompatActivity {
                 dbHelper.insertHistory(username);
                 dbHelper.recordEvent(username, "LOGIN", "Đăng nhập thành công");
 
-                // Lưu thông tin user cho màn hình MyAccountActivity
+                // Lưu thông tin user
                 getSharedPreferences("auth", MODE_PRIVATE)
                         .edit()
                         .putString("display_name", username)
                         .putString("display_email", username + "@example.com")
+                        .putBoolean("logged_in", true)
                         .apply();
 
                 // Sau khi đăng nhập thành công
                 SessionManager.getInstance().setUsername(username);
                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
 
-                // ✅ Chuyển sang HomeActivity
                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();

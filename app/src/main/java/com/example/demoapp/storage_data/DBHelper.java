@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import com.example.demoapp.R;
+import com.example.demoapp.model.Album;
 import com.example.demoapp.model.Playlist;
 import com.example.demoapp.model.Song;
 
@@ -20,7 +21,7 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "music.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     // Tên bảng
     private static final String TABLE_PLAYLISTS = "playlists";
@@ -82,13 +83,13 @@ public class DBHelper extends SQLiteOpenHelper {
                 "VALUES ('" + R.drawable.exitsign + "', 'Exit Sign', 'HieuThuHai', 'US-UK Hits', '3:50', " + R.raw.exitsign + ", 1)");
 
         db.execSQL("INSERT INTO songs (imageSong, nameSong, artist, album, duration, res_id, favourite) " +
-                "VALUES ('" + R.drawable.nneungayay + "', 'Nếu một ngày', 'Nguyễn Văn A', 'Ballad Buồn', '3:40', " + R.raw.neungayay + ", 0)");
+                "VALUES ('" + R.drawable.nneungayay + "', 'Nếu một ngày', 'Tuấn Vũ', 'Ballad Buồn', '3:40', " + R.raw.neungayay + ", 0)");
 
         db.execSQL("INSERT INTO songs (imageSong, nameSong, artist, album, duration, res_id, favourite) " +
                 "VALUES ('" + R.drawable.nguoiay + "', 'Người ấy', 'Trịnh Thăng Bình', 'Tuyển tập Trịnh Thăng Bình', '3:55', " + R.raw.nguoiay + ", 0)");
 
         db.execSQL("INSERT INTO songs (imageSong, nameSong, artist, album, duration, res_id, favourite) " +
-                "VALUES ('" + R.drawable.nhungngaymua + "', 'Những ngày mưa', 'Unknown', 'Ballad Buồn', '4:00', " + R.raw.nhungngaymua + ", 0)");
+                "VALUES ('" + R.drawable.nhungngaymua + "', 'Những ngày mưa', 'Lê Gia Bảo', 'Ballad Buồn', '4:00', " + R.raw.nhungngaymua + ", 0)");
 
         db.execSQL("INSERT INTO songs (imageSong, nameSong, artist, album, duration, res_id, favourite) " +
                 "VALUES ('" + R.drawable.sainguoisaithoidiem + "', 'Sai người sai thời điểm', 'Thanh Hưng', 'Ballad Buồn', '4:15', " + R.raw.sainguoisaithoidiem + ", 0)");
@@ -136,14 +137,14 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
-        // Lệnh CREATE TABLE cho BẢNG PLAYLISTS
+        // BẢNG PLAYLISTS
         String CREATE_PLAYLISTS_TABLE = "CREATE TABLE " + TABLE_PLAYLISTS + "("
                 + KEY_PLAYLIST_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + KEY_PLAYLIST_NAME + " TEXT NOT NULL UNIQUE,"
                 + "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" + ")";
         db.execSQL(CREATE_PLAYLISTS_TABLE);
 
-        // Lệnh CREATE TABLE cho BẢNG LIÊN KẾT
+        // BẢNG LIÊN KẾT
         String CREATE_PLAYLIST_SONGS_TABLE = "CREATE TABLE " + TABLE_PLAYLIST_SONGS + "("
                 + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + KEY_PS_PLAYLIST_ID + " INTEGER NOT NULL,"
@@ -151,9 +152,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 + KEY_PS_ORDER + " INTEGER,"
                 + "UNIQUE(" + KEY_PS_PLAYLIST_ID + ", " + KEY_PS_SONG_ID + "),"
                 + "FOREIGN KEY(" + KEY_PS_PLAYLIST_ID + ") REFERENCES " + TABLE_PLAYLISTS + "(" + KEY_PLAYLIST_ID + ") ON DELETE CASCADE,"
-                    + "FOREIGN KEY(" + KEY_PS_SONG_ID + ") REFERENCES " + TABLE_SONGS + "(" + "song_id" + ") ON DELETE CASCADE"
+                + "FOREIGN KEY(" + KEY_PS_SONG_ID + ") REFERENCES songs(id) ON DELETE CASCADE"
+
                 + ")";
         db.execSQL(CREATE_PLAYLIST_SONGS_TABLE);
+
 
 
         ContentValues values = new ContentValues();
@@ -168,6 +171,24 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert(TABLE_PLAYLISTS, null, values);
 
 
+        db.execSQL("INSERT INTO playlist_songs (playlist_id, song_id, song_order) " +
+                "VALUES (1, 1, 1)," +
+                "(1, 2, 2)," +
+                "(1, 3, 3)," +
+                "(1, 4, 4)," +
+                "(1, 5, 5)," +
+                "(1, 12, 6)," +
+                "(1, 13, 7)," +
+                "(1, 18, 8)");
+
+        db.execSQL("INSERT INTO playlist_songs (playlist_id, song_id, song_order) " +
+                "VALUES (2, 10, 1)," +
+                "(2, 22, 2)," +
+                "(2, 13, 3)," +
+                "(2, 8, 4)," +
+                "(2, 15, 5)," +
+                "(2, 1, 6)," +
+                "(2, 14, 7)");
 
 
 
@@ -205,10 +226,12 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Xóa bảng user cũ
+        db.execSQL("DROP TABLE IF EXISTS songs");
         db.execSQL("DROP TABLE IF EXISTS user");
+        db.execSQL("DROP TABLE IF EXISTS history");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_HISTORY);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLAYLIST_SONGS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLAYLISTS);
-
         // Tạo lại bảng mới
         onCreate(db);
     }
@@ -224,11 +247,32 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_PLAYLIST_NAME, name);
 
-        // Chèn hàng
         long id = db.insert(TABLE_PLAYLISTS, null, values);
         db.close();
         return id;
     }
+
+
+
+    // ĐỔI TÊN ALBUM (update cột album của các bài hát)
+    public int renameAlbum(String oldName, String newName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("album", newName);
+        int rows = db.update("songs", values, "album = ?", new String[]{oldName});
+        db.close();
+        return rows;
+    }
+
+    public int renamePlaylist(String oldName, String newName){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("name", newName);
+        int rows = db.update("playlists", values,"name = ?", new String[]{oldName});
+        db.close();
+        return rows;
+    }
+
 
     public boolean addSongToPlaylist(long playlistId, long songId) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -258,6 +302,7 @@ public class DBHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             maxOrder = cursor.getInt(0);
         }
+
         cursor.close();
         return maxOrder;
     }
@@ -288,6 +333,16 @@ public class DBHelper extends SQLiteOpenHelper {
     public int getNumSongByAlbum(String albumName){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM songs WHERE album = ?", new String[]{albumName});
+        cursor.moveToFirst();
+        int count = cursor.getInt(0);
+        cursor.close();
+        db.close();
+        return count;
+    }
+
+    public int getNumSongByPlaylist(String playlistName){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM playlists WHERE name = ?", new String[]{playlistName});
         cursor.moveToFirst();
         int count = cursor.getInt(0);
         cursor.close();
@@ -351,7 +406,70 @@ public class DBHelper extends SQLiteOpenHelper {
         return history;
     }
 
+    // Hàm lấy id của bài hát theo resource id
+    public long getSongIdByResId(int songResId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        long songId = -1;
 
+        String selection = "res_id = ?";
+        String[] selectionArgs = new String[]{String.valueOf(songResId)};
+
+        Cursor cursor = db.query(
+                "songs",
+                new String[]{"id"},
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+
+        if (cursor.moveToFirst()) {
+            songId = cursor.getLong(0);
+        } else {
+            Log.e("DB_ERROR", "Không tìm thấy Bài hát trong DB với res_id: " + songResId);
+        }
+
+        cursor.close();
+        db.close();
+        return songId;
+    }
+
+    // Hàm lấy danh sách bài hát theo tên Playlist
+    public List<Song> getSongsByPlaylist(String playlistName) {
+        List<Song> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String sql = "SELECT " +
+                "s.id, s.imageSong, s.nameSong, s.artist, s.album, s.duration, s.res_id, s.favourite, " +
+                "ps.song_order " +
+                "FROM songs s " +
+                "INNER JOIN playlist_songs ps ON s.id = ps.song_id " +
+                "INNER JOIN playlists p ON ps.playlist_id = p." + KEY_PLAYLIST_ID + " " +
+                "WHERE p." + KEY_PLAYLIST_NAME + " = ? " +
+                "ORDER BY ps.song_order ASC";
+
+        Cursor cursor = db.rawQuery(sql, new String[]{playlistName});
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
+                int imageSong = cursor.getInt(cursor.getColumnIndexOrThrow("imageSong"));
+                String nameSong = cursor.getString(cursor.getColumnIndexOrThrow("nameSong"));
+                String artist = cursor.getString(cursor.getColumnIndexOrThrow("artist"));
+                String album = cursor.getString(cursor.getColumnIndexOrThrow("album"));
+                String duration = cursor.getString(cursor.getColumnIndexOrThrow("duration"));
+                int resId = cursor.getInt(cursor.getColumnIndexOrThrow("res_id"));
+                boolean favourite = cursor.getInt(cursor.getColumnIndexOrThrow("favourite")) == 1;
+
+                list.add(new Song(id, imageSong, nameSong, artist, album, duration, resId, favourite));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return list;
+    }
 
     // Hàm lấy danh sách bài hát theo album
     public List<Song> getSongsByAlbum(String albumName) {
@@ -381,8 +499,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Lấy tất cả album theo thứ tự mới thêm nhất (Recently added)
-    public List<Playlist> getAlbumsRecentlyAdded() {
-        List<Playlist> albums = new ArrayList<>();
+    public List<Album> getAlbumsRecentlyAdded() {
+        List<Album> albums = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
         // SQLite không có cột 'date' nên ta giả định id tăng dần theo thứ tự thêm
@@ -393,7 +511,7 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
                 String albumName = cursor.getString(cursor.getColumnIndexOrThrow("album"));
                 int imageSong = cursor.getInt(cursor.getColumnIndexOrThrow("imageSong"));
-                albums.add(new Playlist(albumName, imageSong));
+                albums.add(new Album(albumName, imageSong));
             } while (cursor.moveToNext());
         }
 
@@ -403,8 +521,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Lấy tất cả album theo tên (Playlist name)
-    public List<Playlist> getAlbumsSortedByName() {
-        List<Playlist> albums = new ArrayList<>();
+    public List<Album> getAlbumsSortedByName() {
+        List<Album> albums = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
         String sql = "SELECT album, imageSong FROM songs GROUP BY album ORDER BY album ASC";
@@ -414,7 +532,7 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
                 String albumName = cursor.getString(cursor.getColumnIndexOrThrow("album"));
                 int imageSong = cursor.getInt(cursor.getColumnIndexOrThrow("imageSong"));
-                albums.add(new Playlist(albumName, imageSong));
+                albums.add(new Album(albumName, imageSong));
             } while (cursor.moveToNext());
         }
 
@@ -505,8 +623,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Hàm lấy tất cả album bài hát
-    public List<Playlist> getAllAlbums() {
-        List<Playlist> albums = new ArrayList<>();
+    public List<Album> getAllAlbums() {
+        List<Album> albums = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
         // Lấy mỗi album 1 ảnh (ảnh đầu tiên trong album)
@@ -517,13 +635,53 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
                 String albumName = cursor.getString(cursor.getColumnIndexOrThrow("album"));
                 int imageSong = cursor.getInt(cursor.getColumnIndexOrThrow("imageSong"));
-                albums.add(new Playlist(albumName, imageSong));
+                albums.add(new Album(albumName, imageSong));
             } while (cursor.moveToNext());
         }
 
         cursor.close();
         db.close();
         return albums;
+    }
+
+
+    public List<Playlist> getAllPlaylist() {
+        List<Playlist> playlists = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String sql = "SELECT p." + KEY_PLAYLIST_NAME + ", s.imageSong " +
+                "FROM " + TABLE_PLAYLISTS + " AS p " +
+                "LEFT JOIN " + TABLE_PLAYLIST_SONGS + " AS ps " +
+                "ON p." + KEY_PLAYLIST_ID + " = ps." + KEY_PS_PLAYLIST_ID + " " +
+                "LEFT JOIN " + TABLE_SONGS + " AS s " +
+                "ON ps." + KEY_PS_SONG_ID + " = s.id " +
+                "GROUP BY p." + KEY_PLAYLIST_ID + " " +
+                "ORDER BY p.created_at DESC";
+
+        Cursor cursor = db.rawQuery(sql, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                String playlistName = cursor.getString(cursor.getColumnIndexOrThrow(KEY_PLAYLIST_NAME));
+
+                // Lấy ID ảnh. Có thể là null nếu Playlist chưa có bài hát nào.
+                int imageResId = 0;
+                int imageIndex = cursor.getColumnIndex("imageSong");
+
+                if (!cursor.isNull(imageIndex)) {
+                    imageResId = cursor.getInt(imageIndex);
+                } else {
+                    // Nếu Playlist trống, sử dụng ảnh mặc định
+                    imageResId = R.drawable.default_playlist;
+                }
+
+                playlists.add(new Playlist(playlistName, imageResId));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return playlists;
     }
 
 

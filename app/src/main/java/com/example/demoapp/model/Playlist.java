@@ -16,5 +16,8 @@ public class Playlist {
     public int getImageResId() {
         return imageResId;
     }
+    public void setName(String name) {
+        this.name = name;
+    }
 }
 

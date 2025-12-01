@@ -24,7 +24,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.demoapp.MyService;
 import com.example.demoapp.R;
+import com.example.demoapp.adapter.AlbumSongAdapter;
 import com.example.demoapp.adapter.PlaylistAdapter;
+import com.example.demoapp.model.Album;
 import com.example.demoapp.model.Playlist;
 import com.example.demoapp.storage_data.DBHelper;
 
@@ -63,7 +65,13 @@ public class MyAccountActivity extends AppCompatActivity {
         // --- Xử lý nút đăng xuất ---
         Button btnLogout = findViewById(R.id.btnLogOut);
         btnLogout.setOnClickListener(v -> {
-            getSharedPreferences("auth", MODE_PRIVATE).edit().clear().apply();
+            getSharedPreferences("auth", MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("logged_in", false)
+                    .remove("display_name")
+                    .remove("display_email")
+                    .remove("display_phone")
+                    .apply();
 
             Intent stopMusic = new Intent(MyAccountActivity.this, MyService.class);
             stopService(stopMusic);
@@ -74,15 +82,15 @@ public class MyAccountActivity extends AppCompatActivity {
             finish();
         });
 
+
         // --- Chỉnh sửa thông tin ---
         Button btnEdit = findViewById(R.id.btnEdit);
         btnEdit.setOnClickListener(v -> showEditDialog());
 
         // Bind dữ liệu danh sách phát
-        RecyclerView rvPlaylist = findViewById(R.id.rvPlaylists);
+        RecyclerView rvPlaylist = findViewById(R.id.rvAlbum);
         DBHelper dbHelper = new DBHelper(this);
-        List<Playlist> playlists = dbHelper.getAllAlbums();
-        Log.d("DEBUG_PLAYLIST", "Số lượng album: " + playlists.size());
+        List<Playlist> playlists = dbHelper.getAllPlaylist();
 
         PlaylistAdapter adapter = new PlaylistAdapter(playlists, R.layout.item_playlist_vertical);
         rvPlaylist.setLayoutManager(
@@ -124,7 +132,7 @@ public class MyAccountActivity extends AppCompatActivity {
         View.OnClickListener listener = clickedView -> {
             popupWindow.dismiss();
 
-            List<Playlist> result;
+            List<Album> result;
             if (clickedView == optRecently) {
                 result = dbHelper.getAlbumsRecentlyAdded();
                 Toast.makeText(this, "Recently added", Toast.LENGTH_SHORT).show();
@@ -137,9 +145,9 @@ public class MyAccountActivity extends AppCompatActivity {
             }
 
             // Cập nhật RecyclerView
-            RecyclerView rvPlaylist = findViewById(R.id.rvPlaylists);
-            PlaylistAdapter adapter = new PlaylistAdapter(result, R.layout.item_playlist_vertical);
-            rvPlaylist.setAdapter(adapter);
+            RecyclerView rvAlbum = findViewById(R.id.rvAlbum);
+            AlbumSongAdapter adapter = new AlbumSongAdapter(result);
+            rvAlbum.setAdapter(adapter);
         };
 
         optRecently.setOnClickListener(listener);

@@ -154,18 +154,18 @@
 
             <!--Outstanding-->
             <TextView
-                android:id="@+id/txtOutstanding"
+                android:id="@+id/tvAlbum"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Nổi bật hàng tuần"
+                android:text="Album nổi bật"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvOutstanding"
+                android:id="@+id/rvAlbumSong"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

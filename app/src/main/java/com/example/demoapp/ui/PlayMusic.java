@@ -16,10 +16,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
@@ -344,7 +348,7 @@ public class PlayMusic extends AppCompatActivity {
                 long playlistId = dbHelper.getPlaylistIdByName(playlistName);
 
                 if (playlistId != -1) {
-                    long currentSongId = songResId;
+                    long currentSongId = dbHelper.getSongIdByResId(songResId);
 
                     boolean success = dbHelper.addSongToPlaylist(playlistId, currentSongId);
 
@@ -375,6 +379,11 @@ public class PlayMusic extends AppCompatActivity {
                 dbHelper.close();
                 bottomSheetDialog1.dismiss();
                 bottomSheetDialog.dismiss();
+            });
+
+            bottomSheetView1.findViewById(R.id.tvCreatePlaylist).setOnClickListener(v1 -> {
+                // ... Code thêm ds phát mới ...
+                showCreatePlaylistDialog(context);
             });
 
             bottomSheetDialog1.setContentView(bottomSheetView1);
@@ -421,6 +430,60 @@ public class PlayMusic extends AppCompatActivity {
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
     }
+
+
+
+    private void showCreatePlaylistDialog(Context context) {
+        View dialogView = LayoutInflater.from(context)
+                .inflate(R.layout.dialog_create_playlist, null);
+
+        final EditText etPlaylistName = dialogView.findViewById(R.id.etPlaylistName);
+
+        final String username = SessionManager.getInstance().getUsername();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+
+        builder.setPositiveButton("Lưu", null);
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.setOnShowListener(dialogInterface -> {
+
+            Button saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+            saveButton.setOnClickListener(v -> {
+                String newName = etPlaylistName.getText().toString().trim();
+                final DBHelper dbHelper = new DBHelper(context);
+
+                // 5. VALIDATION: Kiểm tra tên trống
+                if (newName.isEmpty()) {
+                    Toast.makeText(context, "Tên Playlist không được để trống.", Toast.LENGTH_SHORT).show();
+                    etPlaylistName.setError("Không được để trống");
+                    return;
+                }
+
+                long newId = dbHelper.addPlaylist(newName);
+
+                if (newId != -1) {
+                    Toast.makeText(context, "✅ Đã tạo Playlist \"" + newName + "\" thành công!", Toast.LENGTH_SHORT).show();
+
+                    dbHelper.recordEvent(username, "CREATE_PLAYLIST", "Đã tạo Playlist mới: " + newName);
+
+                    // TODO: Cập nhật danh sách Playlist hiển thị trong BottomSheetDialog 1
+
+                    dialog.dismiss();
+                } else {
+                    Toast.makeText(context, "Tên Playlist đã tồn tại hoặc lỗi.", Toast.LENGTH_SHORT).show();
+                    etPlaylistName.setError("Tên đã tồn tại");
+                }
+            });
+        });
+    }
+
 
 
     private void updateDuration(TextView tvDuration) {
